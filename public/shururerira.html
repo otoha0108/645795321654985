@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>しゅるれりら - 編曲依頼資料</title>
+    <style>
+        @font-face {
+            font-family: 'PixelMplus12';
+            src: url('/fonts/PixelMplus12-Regular.ttf') format('truetype');
+            font-weight: 400;
+            font-style: normal;
+            font-display: swap;
+        }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        .hero-slide {
+            padding-top: 120px;
+            padding-bottom: 200px;
+        }
+
+        .hero-slide .title-animate {
+            margin-top: 18px;
+            margin-bottom: 1.1em;
+        }
+
+        .hero-slide .subtitle {
+            margin-top: 1.4em;
+            margin-bottom: 2.6em;
+            font-size: 1.25em;
+            letter-spacing: 0.08em;
+        }
+        
+        body {
+            font-family: 'Hiragino Kaku Gothic ProN', 'Yu Gothic', 'Meiryo', sans-serif;
+            background: radial-gradient(circle at 20% 20%, rgba(118, 75, 162, 0.08), transparent 25%),
+                        radial-gradient(circle at 80% 30%, rgba(102, 126, 234, 0.06), transparent 22%),
+                        linear-gradient(135deg, #06070e 0%, #0f1120 40%, #0a0a0f 100%);
+            color: #fff;
+            overflow: hidden;
+            -webkit-tap-highlight-color: transparent;
+            position: relative;
+        }
+
+        /* subtle scanline/grid overlay */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            background:
+                linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+            background-size: 100% 3px, 3px 100%;
+            mix-blend-mode: screen;
+            opacity: 0.28;
+            z-index: 0;
+        }
+        
+        .slide-container {
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            position: relative;
+            background: radial-gradient(circle at 20% 20%, rgba(118, 75, 162, 0.08), transparent 25%),
+                        radial-gradient(circle at 80% 30%, rgba(102, 126, 234, 0.06), transparent 22%),
+                        #0a0a0a;
+        }
+        
+        .slide {
+            display: none;
+            width: 100%;
+            height: 100vh;
+            padding: 40px 20px 140px;
+            box-sizing: border-box;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 100%);
+            color: #ffffff;
+            overflow-y: auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        .locked .slide-container,
+        .locked .progress,
+        .locked .nav-buttons {
+            filter: blur(12px);
+            pointer-events: none;
+            user-select: none;
+        }
+
+        .gate {
+            position: fixed;
+            inset: 0;
+            background: rgba(6, 7, 14, 0.94);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            padding: 24px;
+        }
+
+        .gate-box {
+            max-width: 420px;
+            width: 100%;
+            background: linear-gradient(160deg, rgba(25, 29, 48, 0.92), rgba(14, 16, 30, 0.95));
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            padding: 24px;
+            text-align: center;
+        }
+
+        .gate-title {
+            font-family: 'PixelMplus12', 'Press Start 2P', 'PixelMplus10', 'MS PGothic', 'Arial Black', sans-serif;
+            letter-spacing: 0.08em;
+            font-size: 1.1em;
+            margin-bottom: 12px;
+        }
+
+        .gate-desc {
+            font-size: 0.95em;
+            color: #cbd5f5;
+            margin-bottom: 16px;
+            line-height: 1.6;
+        }
+
+        .gate input {
+            width: 100%;
+            padding: 12px 14px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.05);
+            color: #fff;
+            font-size: 1em;
+            margin-bottom: 12px;
+            outline: none;
+        }
+
+        .gate button {
+            width: 100%;
+            padding: 12px 14px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: linear-gradient(145deg, #7689ff 0%, #9a65ff 100%);
+            color: #0b0d15;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            cursor: pointer;
+        }
+
+        .gate-error {
+            color: #ff90a0;
+            font-size: 0.9em;
+            min-height: 1.2em;
+            margin-top: 6px;
+        }
+        
+        .slide.active {
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: center;
+            text-align: center;
+            animation: fadeIn 0.5s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .title-animate {
+            font-family: 'Hiragino Mincho ProN', 'Yu Mincho', 'YuMincho', serif;
+            font-size: 2.8em;
+            letter-spacing: 0.18em;
+            color: #ffffff;
+            display: inline-flex;
+            gap: 0.04em;
+            margin-bottom: 0.8em;
+        }
+        
+        .title-char {
+            opacity: 0;
+            display: inline-block;
+            transform: translateY(var(--offset, 0));
+            animation: typeIn 1.2s cubic-bezier(0.18, 0.72, 0.15, 1) forwards, floaty 8.5s ease-in-out infinite alternate;
+            animation-delay: var(--delay, 0s), 0s;
+        }
+
+        @keyframes typeIn {
+            from { opacity: 0; transform: translateY(calc(var(--offset, 0) + 16px)); filter: blur(2px); }
+            to { opacity: 1; transform: translateY(var(--offset, 0)); filter: blur(0); }
+        }
+
+        @keyframes floaty {
+            from { transform: translateY(calc(var(--offset, 0) - var(--drift, 3px))); }
+            to { transform: translateY(calc(var(--offset, 0) + var(--drift, 3px))); }
+        }
+        
+        h1 {
+            font-size: 2em;
+            margin-bottom: 0.5em;
+            color: #ffffff;
+            background: none;
+            -webkit-text-fill-color: #ffffff;
+            -webkit-background-clip: border-box;
+        }
+        
+        h2 {
+            font-size: 1.5em;
+            margin-bottom: 1rem;
+            border-bottom: 3px solid #5a7bff;
+            padding-bottom: 0.5rem;
+            width: 100%;
+            max-width: 600px;
+            text-shadow: 0 0 8px rgba(90, 123, 255, 0.4);
+            font-family: 'PixelMplus12', 'Press Start 2P', 'PixelMplus10', 'MS PGothic', 'Arial Black', sans-serif;
+            letter-spacing: 0.08em;
+        }
+        
+        h3 {
+            font-size: 1.2em;
+            margin: 1em 0 0.5em 0;
+            color: #a7b8ff;
+            text-shadow: 0 0 6px rgba(90, 123, 255, 0.35);
+            letter-spacing: 0.04em;
+            font-family: 'PixelMplus12', 'Press Start 2P', 'PixelMplus10', 'MS PGothic', 'Arial Black', sans-serif;
+            letter-spacing: 0.08em;
+        }
+        
+        .subtitle {
+            color: #94a3b8;
+            font-size: 1em;
+            margin-top: 1rem;
+        }
+        
+        .content-box {
+            background: linear-gradient(160deg, rgba(34, 40, 66, 0.8), rgba(25, 28, 48, 0.9));
+            border: 2px solid rgba(107, 135, 255, 0.35);
+            border-radius: 10px;
+            padding: 1.5em;
+            margin: 1em 0;
+            width: 100%;
+            max-width: 720px;
+            text-align: left;
+            box-shadow:
+                0 0 0 1px rgba(16, 24, 44, 0.8),
+                0 14px 32px -18px rgba(0, 0, 0, 0.75),
+                inset 0 1px 0 rgba(255, 255, 255, 0.06);
+        }
+        
+        .content-box.warning {
+            background: linear-gradient(160deg, rgba(82, 28, 52, 0.75), rgba(48, 16, 36, 0.9));
+            border-color: rgba(255, 102, 140, 0.5);
+            box-shadow:
+                0 0 0 1px rgba(32, 10, 22, 0.9),
+                0 14px 32px -18px rgba(0, 0, 0, 0.75),
+                inset 0 1px 0 rgba(255, 255, 255, 0.05);
+        }
+        
+        .content-box p {
+            line-height: 1.7;
+            margin: 0.5em 0;
+        }
+        
+        .large-text {
+            font-size: 1.2em;
+            font-weight: 600;
+            line-height: 1.6;
+            margin: 1em 0;
+        }
+        
+        .lyrics {
+            line-height: 1.9;
+            white-space: pre-line;
+            text-align: center;
+            font-size: 0.95em;
+            max-width: 700px;
+        }
+        
+        .lyrics p {
+            margin-bottom: 1em;
+        }
+        
+        .dual-target {
+            display: flex;
+            flex-direction: column;
+            gap: 1em;
+            width: 100%;
+            max-width: 700px;
+        }
+        
+        .target-box {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 1.5em;
+            text-align: left;
+        }
+        
+        .target-box h3 {
+            margin-top: 0;
+            color: #a78bfa;
+        }
+        
+        .target-box p {
+            line-height: 1.7;
+            font-size: 0.95em;
+        }
+        
+        .nav-buttons {
+            position: fixed;
+            bottom: 20px;
+            left: 0;
+            right: 0;
+            margin: 0 auto;
+            width: min(640px, 92vw);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(14, 16, 30, 0.9);
+            padding: 12px 16px;
+            border-radius: 12px;
+            backdrop-filter: blur(12px);
+            box-shadow:
+                0 0 0 2px #11162a,
+                0 0 0 4px rgba(60, 80, 160, 0.25),
+                0 14px 24px -12px rgba(0, 0, 0, 0.65);
+            z-index: 1000;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        
+        .nav-buttons button {
+            background: linear-gradient(145deg, #7689ff 0%, #9a65ff 100%);
+            color: #0b0d15;
+            border: 2px solid #c7d0ff;
+            padding: 11px 22px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 0.95em;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            font-family: 'PixelMplus12', 'Press Start 2P', 'PixelMplus10', 'MS PGothic', 'Courier New', monospace;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+            min-width: 118px;
+            box-shadow:
+                0 0 0 2px #10142a,
+                0 6px 14px rgba(0, 0, 0, 0.45),
+                inset 0 -3px 0 rgba(0, 0, 0, 0.25);
+        }
+        
+        .nav-buttons button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow:
+                0 0 0 2px #10142a,
+                0 12px 18px rgba(0, 0, 0, 0.5),
+                inset 0 -3px 0 rgba(0, 0, 0, 0.25);
+            filter: brightness(1.05);
+        }
+        
+        .nav-buttons button:disabled {
+            opacity: 0.35;
+            cursor: not-allowed;
+        }
+        
+        #slideNumber {
+            color: #94a3b8;
+            font-size: 0.9em;
+            min-width: 70px;
+            text-align: center;
+        }
+
+        .progress {
+            position: fixed;
+            bottom: 92px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: min(640px, 92vw);
+            height: 6px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 3px;
+            overflow: hidden;
+            z-index: 900;
+            box-shadow: 0 0 0 2px #12182d, inset 0 1px 0 rgba(255, 255, 255, 0.08);
+        }
+
+        .progress__bar {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #667eea, #8b5cf6);
+            transition: width 0.25s ease;
+            box-shadow: 0 0 12px rgba(139, 92, 246, 0.35);
+        }
+        
+        .sound-detail {
+            background: rgba(139, 92, 246, 0.1);
+            border-left: 4px solid #8b5cf6;
+            padding: 1em;
+            margin: 0.8em 0;
+            border-radius: 4px;
+            box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+        }
+        
+        .sound-detail strong {
+            color: #a78bfa;
+            display: block;
+            margin-bottom: 0.5em;
+        }
+
+        .tieup-figure {
+            margin: 1.5em auto 0;
+            width: 100%;
+            max-width: 720px;
+            text-align: center;
+        }
+
+        .tieup-figure img {
+            width: 100%;
+            max-height: 420px;
+            object-fit: cover;
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.35);
+            background: #0f0f16;
+        }
+
+        .tieup-figure figcaption {
+            margin-top: 0.6em;
+            font-size: 0.9em;
+            color: #94a3b8;
+        }
+
+        
+        @media (min-width: 768px) {
+            .slide {
+                padding: 60px;
+            }
+            
+            .glitch-title {
+                font-size: 4em;
+            }
+            
+            h1 {
+                font-size: 3em;
+            }
+            
+            h2 {
+                font-size: 1.8em;
+            }
+            
+            .dual-target {
+                flex-direction: row;
+            }
+            
+            .target-box {
+                flex: 1;
+            }
+        }
+        
+        @media (max-width: 767px) {
+            .slide {
+                padding: 28px 16px 150px;
+            }
+
+            .nav-buttons {
+                padding: 10px 12px;
+                width: min(560px, 94vw);
+            }
+            
+            .nav-buttons button {
+                padding: 9px 12px;
+                font-size: 0.86em;
+                min-width: 100px;
+            }
+            
+            #slideNumber {
+                font-size: 0.82em;
+                min-width: 50px;
+            }
+
+            .title-animate {
+                font-size: 2.2em;
+                letter-spacing: 0.14em;
+            }
+
+            .hero-slide {
+                padding-top: 100px;
+                padding-bottom: 180px;
+            }
+
+            .content-box,
+            .sound-detail,
+            .lyrics {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body class="locked">
+    <div class="gate" id="gate">
+        <div class="gate-box">
+            <div class="gate-title">ACCESS</div>
+            <div class="gate-desc">パスワードを入力してください。</div>
+            <input type="password" id="gateInput" placeholder="Password">
+            <button id="gateBtn">ENTER</button>
+            <div class="gate-error" id="gateError"></div>
+        </div>
+    </div>
+    <div class="slide-container">
+        <!-- Slide 1: 表紙 -->
+        <div class="slide hero-slide">
+            <h1 class="title-animate" data-title="しゅるれりら">しゅるれりら</h1>
+            <p class="subtitle">ヒトリエ様</p class="subtitle">編曲プロデュース依頼資料</p>
+            <div style="margin-top: 60px; font-size: 1.1em; line-height: 1.8;">
+                <p><strong>作詞・作曲</strong>：音羽-otoha-</p>
+                <p><strong>用途</strong>：アニメ「サンダー3」ED</p>
+            </div>
+        </div>
+
+        <!-- Slide 2: タイアップ情報 -->
+        <div class="slide">
+            <h2>タイアップ情報</h2>
+            <figure class="tieup-figure">
+                <img src="/shururerira-deck/71z0nQxOY3L._AC_UF1000,1000_QL80_.jpg" alt="サンダー3 公式ビジュアル">
+                <figcaption>「サンダー3」公式ビジュアル</figcaption>
+            </figure>
+            <div class="content-box">
+                <h3>作品の概要</h3>
+                <p style="line-height: 1.7;">
+                    月刊少年マガジン連載（池田祐輝）。中学生のぴょんたろうと友人2人（スモール3）が、担任ドクから借りた謎のゲームディスクを再生した隙に、妹ふたばがテレビの中の異世界へ吸い込まれる。<br>
+                    3人はふたばを取り戻すためにマルチバースを冒険する――という奇想天外なSFアドベンチャー。コミカルな日常感と、異世界をまたぐスケール感が同居する。
+                </p>
+            </div>
+            <div class="content-box">
+                <h3>アニメ「サンダー3」ED</h3>
+                <p class="line-height: 1.7;">主人公の妹「ふたば」と「ぷーすけ」が<br>夜中にテレビを見ている映像</p>
+                <p style="margin-top: 1.5em; font-size: 0.95em; opacity: 0.8;">※そのテレビには「もう一つの世界」が映っている</p>
+            </div>
+            <figure class="tieup-figure">
+                <img src="/shururerira-deck/tieup.jpg" alt="音羽なりの勝手なイメージイラスト：ふたばとぷーすけがテレビを見ているスケッチ">
+                <figcaption>音羽なりの勝手なイメージイラスト</figcaption>
+            </figure>
+            <div class="content-box" style="margin-top: 1.5em;">
+                <p style="line-height: 1.7;">この作品の世界観と、ヒトリエの皆さん特有の<strong>ネットカルチャー感</strong>に高い親和性を感じました。</p>
+            </div>
+        </div>
+
+        <!-- Slide 3: 楽曲コンセプト -->
+        <div class="slide">
+            <h2>楽曲コンセプト</h2>
+            <h3>「しゅるれりら」とは</h3>
+            
+            <div class="content-box">
+                <p class="large-text">考える前に自由に創造を起こすこと、またはその状態を表す造語</p>
+            </div>
+
+            <div class="content-box">
+                <p>子供が「シュルレアリスム」という言葉を、意味も分からないまま聞き間違えて、舌ったらずに発音しているイメージから生まれました。</p>
+            </div>
+
+            <div class="content-box">
+                <h3>「シュルレアリスム」概要</h3>
+                <p style="line-height: 1.7;">
+                    1920年代にアンドレ・ブルトンらが提唱した前衛芸術運動。<br>
+                    「意識や理性で整理する前に、無意識下から自動的に立ち上がるイメージや言葉を信じて表現する」ことを重視し、日常の現実と夢や潜在意識が交錯する<h4>高次元の「もう一つの現実」を描こうとする。</h4>
+                </p>
+                <p style="line-height: 1.7; margin-top: 0.8em;">
+                    本作の「しゅるれりら」は、その自動的な創造の瞬間を、子供の口ぶりと音の快感で体現した語感。
+                </p>
+            </div>
+
+        </div>
+
+        <!-- Slide 4: ターゲット感覚 -->
+        <div class="slide">
+            <h2>ターゲット感覚（二重構造）</h2>
+            <div class="dual-target">
+                <div class="target-box">
+                    <h3>疲弊した現代人</h3>
+                    <p>もう思考する体力がない<br>
+                    正しさや判断を求められることに疲弊している<br>
+                    AIや時代の加速に適応しきれず、気力を失っている</p>
+                </div>
+                <div class="target-box">
+                    <h3>これからの時代を生きる子供たち</h3>
+                    <p>まだ意味や正解を理解しなくていい存在<br>
+                    音・リズム・動きで世界を素直に受け取る年齢<br>
+                    これからさらに文明が加速する社会に入っていく</p>
+                </div>
+            </div>
+            <div class="content-box" style="margin-top: 1.5em;">
+                <p style="text-align: center; font-size: 1.1em;"><strong>同じ音楽が、別のレイヤーで受け取られる状態</strong>を目指しています。</p>
+            </div>
+        </div>
+
+        <!-- Slide 4: 歌詞全文 -->
+        <div class="slide">
+            <h2>歌詞全文</h2>
+            <div class="lyrics">
+                <p>あぁ、目が覚めたら<br>
+                違う誰かに変わってないかな<br>
+                誰もが認める天才とか<br>
+                完全無欠のヒーローとか<br>
+
+                <p>ちっぽけな夜の中 夢を見る<br>
+                涙の海に潜り込んだら<br>
+                まっさらな宇宙を泳ぎに行こう<br>
+                案外世界も救えるさ</p>
+                
+                <p>誰かの夢のかなたへ<br>
+                知らない星のかなたへ<br>
+                <strong>しゅるれりら しゅるれりら</strong><br>
+                あの宙もこえてゆく</p>
+                
+                <p>ひしゃげた柵を乗りこえ<br>
+                割れた鏡を踏みこえ<br>
+                <strong>しゅるれりら しゅるれりら</strong><br>
+                その声に飛んでゆく</p>
+                
+                <p>昼行灯の唐変木の木偶の坊でも<br>
+                世界を全部ひっくり返す夜を待ってる</p>
+            </div>
+        </div>
+
+        <!-- Slide 5: 作詞・作曲メモ -->
+        <div class="slide">
+            <h2>作詞・作曲の意識</h2>
+            <div class="content-box">
+                <p>サンダー3のレトロな絵柄、不可能を可能にするストレートな物語から、ドラえもんのような夕方アニメを連想しました。昔口ずさんでいた子ども向けアニメの曲を思い出しながら、シンプルなメロディと子どもにも届く言葉を意識しています。</p>
+                <p style="margin-top: 1em;">一方で、そのままでは素直すぎるかもしれないという不安もあります。だからこそ、ヒトリエの持つネット的なズレやアイロニーを重ねることで、優しい入口と奇妙な引っかかりが同居する状態にしたいと考えています。</p>
+            </div>
+        </div>
+
+        <!-- Slide 5: サウンド方向性（詳細版） -->
+        <div class="slide">
+            <h2>サウンド方向性</h2>
+            
+            <div class="sound-detail">
+                <strong>■ 基本コンセプト</strong>
+                <p>現状のデモ程度のバンドサウンドに加え、<strong>電子音・シンセサイザーも主張強め</strong>の構成</p>
+            </div>
+
+            <div class="content-box">
+                <h3>ヒトリエ×サンダー3の化学反応</h3>
+                <p><strong>• デジタルとアナログの境界を自在に行き来できる</strong><br>
+                インターネット発の音楽文化で培われた高密度の楽曲を、ライブバンドならではのグルーヴに翻訳してきたのがヒトリエだと思っています。現実と画面の向こう側を行き来する「サンダー3」の世界観に合わせ、デジタル的な異世界感やノイズを人間味ある演奏と併せて落とし込んでいただけたらと考えています。</p>
+                <p><strong>• ポップと違和感の絶妙な両立</strong><br>
+                耳に残るキャッチーさの裏に、転調や突発的な曲調変化で「ん？」と思わせるフック。「サンダー3」もレトロなキャラクターとリアルな3D世界というギャップを持つ作品なので、楽曲も優しい入口と奇妙な違和感を同居させたいと思っています。</p>
+                <p><strong>• ネット文化特有の遊び心とアイロニー</strong><br>
+                メタ構造や内輪ネタが自然に溶け込むネット感覚を音に落とし込みたい。子ども向け番組のような明るさと、不穏でシュールなフックを融合させ、クセになる感覚を狙いたいと考えています。</p>
+            </div>
+        </div>
+
+        <!-- Slide 6: サウンド方向性（続き） -->
+        <div class="slide">
+            <h2>サウンド方向性（続き）</h2>
+            
+            <div class="content-box">
+                <h3>具体的なサウンドの提案（例）</h3>
+                <p><strong>• 唐突な変化</strong><br>
+                セクションごとに唐突な空気の変化を感じさせる仕掛け。「サンダー3」1話の急展開にもリンク。</p>
+                <p><strong>• ノイズや効果音</strong><br>
+                テレビのザッピング音、ゲーム機の効果音、子どもの声など、ネットやテレビ文化を想起させる素材をアクセントに。</p>
+                <p><strong>• 最終的には大衆性を確保しつつ、必ず刺さる歪みを残す</strong><br>
+                聴きやすさを損なわない範囲で、不穏なフックを忍ばせ、無意識に違和感を覚えるポイントを作る。</p>
+            </div>
+        </div>
+
+        <!-- Slide 9: 依頼事項まとめ -->
+        <div class="slide">
+            <h2>依頼事項まとめ</h2>
+            <div class="content-box">
+                <h3>依頼事項</h3>
+                <p>• バンドサウンドおよび電子音・効果音の選定と配置<br>
+                • サビの賑やかさ/明るさと、全体のどこかに忍ばせる不穏さのバランス調整<br>
+                • (可能であれば)レコーディング<br>
+                • レトロゲーム的質感の現代的アップデート</p>
+            </div>
+            <div class="content-box warning">
+                <h3>重要事項</h3>
+                <p>• 冒頭のノイズ+リモコンの「ピッ」という音は、ED映像のイメージと楽曲のコンセプト上残していただきたいです。(「テレビをつける=もう一つの世界へ入る」という導入を音で示しています。)<br>
+                • TVスポット用尺確認のため、一旦は1分30秒になります。その後は3分〜4分程度のフルサイズ作成もお願いできればと思います。<br>
+                • 大衆性は保ちつつ、インターネットや漫画カルチャーが好きな方達にも刺さりそうなヒトリエならではの持ち味を、私は渇望しています。</p>
+            </div>
+        </div>
+
+        <!-- Slide 10: 最後に -->
+        <div class="slide">
+            <h2>最後に</h2>
+            <div class="content-box" style="text-align: center; padding: 2em;">
+                <p style="font-size: 1.2em; line-height: 1.8; margin-bottom: 1.5em;">
+                    この曲が伝えたいのは、<br>
+                    <strong>「分かろうとしなくていい、正しくあろうとしなくていい</strong><br>
+                    <strong>でも、想像/創造することだけはやめないでほしい」</strong>
+                </p>
+                <p style="font-size: 1em; opacity: 0.9; margin-bottom: 2em;">
+                    ある意味私たちクリエイターも当事者になる楽曲だと思っています。<br>
+                </p>
+                <p style="font-size: 1.1em; margin-top: 2em;">
+                    お忙しい中、急なお願いとなってしまって大変恐縮ですが、何卒よろしくお願いいたします。
+                </p>
+                <p style="margin-top: 2em; font-size: 0.9em; opacity: 0.7;">
+                    音羽-otoha-
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="progress" aria-hidden="true">
+        <div class="progress__bar" id="progressBar"></div>
+    </div>
+    <div class="nav-buttons">
+        <button id="prevBtn" onclick="changeSlide(-1)">◀ 前へ</button>
+        <span id="slideNumber"></span>
+        <button id="nextBtn" onclick="changeSlide(1)">次へ ▶</button>
+    </div>
+
+    <script>
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+        const totalSlides = slides.length;
+        const progressBar = document.getElementById('progressBar');
+        const slideContainer = document.querySelector('.slide-container');
+        const titleEl = document.querySelector('.title-animate');
+        const gate = document.getElementById('gate');
+        const gateInput = document.getElementById('gateInput');
+        const gateBtn = document.getElementById('gateBtn');
+        const gateError = document.getElementById('gateError');
+        const ACCESS_PASSWORD = "0112otorie"; // 必要に応じて変更してください
+
+        function resetScroll() {
+            if (slideContainer) slideContainer.scrollTop = 0;
+            document.documentElement.scrollTop = 0;
+            document.body.scrollTop = 0;
+            if (slides[currentSlide]) slides[currentSlide].scrollTop = 0;
+            // Safari/iOS で遅延が必要な場合に備えて
+            requestAnimationFrame(() => {
+                if (slideContainer) slideContainer.scrollTop = 0;
+                if (slides[currentSlide]) slides[currentSlide].scrollTop = 0;
+            });
+        }
+
+        function showSlide(n) {
+            if (n >= totalSlides) currentSlide = totalSlides - 1;
+            if (n < 0) currentSlide = 0;
+
+            resetScroll();
+            
+            slides.forEach((slide, index) => {
+                slide.classList.remove('active');
+                if (index === currentSlide) {
+                    slide.classList.add('active');
+                    slide.scrollTop = 0;
+                }
+            });
+            
+            document.getElementById('slideNumber').textContent = `${currentSlide + 1} / ${totalSlides}`;
+            
+            document.getElementById('prevBtn').disabled = currentSlide === 0;
+            document.getElementById('nextBtn').disabled = currentSlide === totalSlides - 1;
+
+            const ratio = (currentSlide + 1) / totalSlides;
+            if (progressBar) {
+                progressBar.style.width = `${ratio * 100}%`;
+            }
+        }
+
+        function changeSlide(direction) {
+            currentSlide += direction;
+            showSlide(currentSlide);
+        }
+
+        function animateTitle() {
+            if (!titleEl) return;
+            const text = (titleEl.dataset.title || titleEl.textContent || '').trim();
+            if (!text) return;
+            titleEl.textContent = '';
+            Array.from(text).forEach((char, idx) => {
+                const span = document.createElement('span');
+                span.className = 'title-char';
+                span.textContent = char === ' ' ? '\u00A0' : char;
+                const offset = (Math.random() * 14 - 7).toFixed(1) + 'px';
+                const drift = (Math.random() * 6 - 3).toFixed(1) + 'px';
+                span.style.setProperty('--offset', offset);
+                span.style.setProperty('--drift', drift);
+                span.style.setProperty('--delay', `${idx * 0.24}s`);
+                titleEl.appendChild(span);
+            });
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft') changeSlide(-1);
+            if (e.key === 'ArrowRight') changeSlide(1);
+        });
+
+        function unlock() {
+            document.body.classList.remove('locked');
+            if (gate) gate.style.display = 'none';
+            showSlide(0);
+            animateTitle();
+        }
+
+        function handleAuth() {
+            if (!gateInput) return;
+            const val = gateInput.value.trim();
+            if (val === ACCESS_PASSWORD) {
+                sessionStorage.setItem('shurureriraAccess', 'ok');
+                unlock();
+            } else {
+                gateError.textContent = "パスワードが違います。";
+            }
+        }
+
+        if (sessionStorage.getItem('shurureriraAccess') === 'ok') {
+            unlock();
+        } else {
+            document.body.classList.add('locked');
+            if (gateBtn) gateBtn.addEventListener('click', handleAuth);
+            if (gateInput) gateInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') handleAuth();
+            });
+        }
+
+    </script>
+</body>
+</html>
