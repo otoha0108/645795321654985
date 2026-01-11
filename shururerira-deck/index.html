@@ -5,18 +5,60 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>しゅるれりら - 編曲依頼資料</title>
     <style>
+        @font-face {
+            font-family: 'PixelMplus12';
+            src: url('fonts/PixelMplus12-Regular.ttf') format('truetype');
+            font-weight: 400;
+            font-style: normal;
+            font-display: swap;
+        }
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
+
+        .hero-slide {
+            padding-top: 120px;
+            padding-bottom: 200px;
+        }
+
+        .hero-slide .title-animate {
+            margin-top: 18px;
+            margin-bottom: 1.1em;
+        }
+
+        .hero-slide .subtitle {
+            margin-top: 1.4em;
+            margin-bottom: 2.6em;
+            font-size: 1.25em;
+            letter-spacing: 0.08em;
+        }
         
         body {
             font-family: 'Hiragino Kaku Gothic ProN', 'Yu Gothic', 'Meiryo', sans-serif;
-            background: #0a0a0a;
+            background: radial-gradient(circle at 20% 20%, rgba(118, 75, 162, 0.08), transparent 25%),
+                        radial-gradient(circle at 80% 30%, rgba(102, 126, 234, 0.06), transparent 22%),
+                        linear-gradient(135deg, #06070e 0%, #0f1120 40%, #0a0a0f 100%);
             color: #fff;
             overflow: hidden;
             -webkit-tap-highlight-color: transparent;
+            position: relative;
+        }
+
+        /* subtle scanline/grid overlay */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            background:
+                linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+            background-size: 100% 3px, 3px 100%;
+            mix-blend-mode: screen;
+            opacity: 0.28;
+            z-index: 0;
         }
         
         .slide-container {
@@ -38,6 +80,83 @@
             background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 100%);
             color: #ffffff;
             overflow-y: auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        .locked .slide-container,
+        .locked .progress,
+        .locked .nav-buttons {
+            filter: blur(12px);
+            pointer-events: none;
+            user-select: none;
+        }
+
+        .gate {
+            position: fixed;
+            inset: 0;
+            background: rgba(6, 7, 14, 0.94);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            padding: 24px;
+        }
+
+        .gate-box {
+            max-width: 420px;
+            width: 100%;
+            background: linear-gradient(160deg, rgba(25, 29, 48, 0.92), rgba(14, 16, 30, 0.95));
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            padding: 24px;
+            text-align: center;
+        }
+
+        .gate-title {
+            font-family: 'PixelMplus12', 'Press Start 2P', 'PixelMplus10', 'MS PGothic', 'Arial Black', sans-serif;
+            letter-spacing: 0.08em;
+            font-size: 1.1em;
+            margin-bottom: 12px;
+        }
+
+        .gate-desc {
+            font-size: 0.95em;
+            color: #cbd5f5;
+            margin-bottom: 16px;
+            line-height: 1.6;
+        }
+
+        .gate input {
+            width: 100%;
+            padding: 12px 14px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.05);
+            color: #fff;
+            font-size: 1em;
+            margin-bottom: 12px;
+            outline: none;
+        }
+
+        .gate button {
+            width: 100%;
+            padding: 12px 14px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: linear-gradient(145deg, #7689ff 0%, #9a65ff 100%);
+            color: #0b0d15;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            cursor: pointer;
+        }
+
+        .gate-error {
+            color: #ff90a0;
+            font-size: 0.9em;
+            min-height: 1.2em;
+            margin-top: 6px;
         }
         
         .slide.active {
@@ -54,57 +173,63 @@
             to { opacity: 1; transform: translateY(0); }
         }
         
-        .glitch-title {
-            font-family: 'Yu Mincho', 'YuMincho', 'Hiragino Mincho ProN', serif;
-            font-size: 2.5em;
-            margin-bottom: 0.5em;
-            position: relative;
-            display: inline-block;
-            animation: glitch 3s infinite;
-            letter-spacing: 0.15em;
+        .title-animate {
+            font-family: 'Hiragino Mincho ProN', 'Yu Mincho', 'YuMincho', serif;
+            font-size: 2.8em;
+            letter-spacing: 0.18em;
+            color: #ffffff;
+            display: inline-flex;
+            gap: 0.04em;
+            margin-bottom: 0.8em;
         }
         
-        @keyframes glitch {
-            0%, 100% { 
-                text-shadow: 2px 2px #ff00ff, -2px -2px #00ffff;
-                transform: skew(0deg);
-            }
-            25% { 
-                text-shadow: -2px 2px #ff00ff, 2px -2px #00ffff;
-                transform: skew(0.5deg);
-            }
-            50% { 
-                text-shadow: 2px -2px #ff00ff, -2px 2px #00ffff;
-                transform: skew(-0.5deg);
-            }
-            75% { 
-                text-shadow: -2px -2px #ff00ff, 2px 2px #00ffff;
-                transform: skew(0.3deg);
-            }
+        .title-char {
+            opacity: 0;
+            display: inline-block;
+            transform: translateY(var(--offset, 0));
+            animation: typeIn 1.2s cubic-bezier(0.18, 0.72, 0.15, 1) forwards, floaty 8.5s ease-in-out infinite alternate;
+            animation-delay: var(--delay, 0s), 0s;
+        }
+
+        @keyframes typeIn {
+            from { opacity: 0; transform: translateY(calc(var(--offset, 0) + 16px)); filter: blur(2px); }
+            to { opacity: 1; transform: translateY(var(--offset, 0)); filter: blur(0); }
+        }
+
+        @keyframes floaty {
+            from { transform: translateY(calc(var(--offset, 0) - var(--drift, 3px))); }
+            to { transform: translateY(calc(var(--offset, 0) + var(--drift, 3px))); }
         }
         
         h1 {
             font-size: 2em;
             margin-bottom: 0.5em;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            color: #ffffff;
+            background: none;
+            -webkit-text-fill-color: #ffffff;
+            -webkit-background-clip: border-box;
         }
         
         h2 {
             font-size: 1.5em;
             margin-bottom: 1rem;
-            border-bottom: 3px solid #667eea;
+            border-bottom: 3px solid #5a7bff;
             padding-bottom: 0.5rem;
             width: 100%;
             max-width: 600px;
+            text-shadow: 0 0 8px rgba(90, 123, 255, 0.4);
+            font-family: 'PixelMplus12', 'Press Start 2P', 'PixelMplus10', 'MS PGothic', 'Arial Black', sans-serif;
+            letter-spacing: 0.08em;
         }
         
         h3 {
             font-size: 1.2em;
             margin: 1em 0 0.5em 0;
-            color: #a78bfa;
+            color: #a7b8ff;
+            text-shadow: 0 0 6px rgba(90, 123, 255, 0.35);
+            letter-spacing: 0.04em;
+            font-family: 'PixelMplus12', 'Press Start 2P', 'PixelMplus10', 'MS PGothic', 'Arial Black', sans-serif;
+            letter-spacing: 0.08em;
         }
         
         .subtitle {
@@ -114,19 +239,27 @@
         }
         
         .content-box {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 8px;
+            background: linear-gradient(160deg, rgba(34, 40, 66, 0.8), rgba(25, 28, 48, 0.9));
+            border: 2px solid rgba(107, 135, 255, 0.35);
+            border-radius: 10px;
             padding: 1.5em;
             margin: 1em 0;
             width: 100%;
-            max-width: 700px;
+            max-width: 720px;
             text-align: left;
+            box-shadow:
+                0 0 0 1px rgba(16, 24, 44, 0.8),
+                0 14px 32px -18px rgba(0, 0, 0, 0.75),
+                inset 0 1px 0 rgba(255, 255, 255, 0.06);
         }
         
         .content-box.warning {
-            background: rgba(239, 68, 68, 0.1);
-            border-color: rgba(239, 68, 68, 0.3);
+            background: linear-gradient(160deg, rgba(82, 28, 52, 0.75), rgba(48, 16, 36, 0.9));
+            border-color: rgba(255, 102, 140, 0.5);
+            box-shadow:
+                0 0 0 1px rgba(32, 10, 22, 0.9),
+                0 14px 32px -18px rgba(0, 0, 0, 0.75),
+                inset 0 1px 0 rgba(255, 255, 255, 0.05);
         }
         
         .content-box p {
@@ -144,9 +277,9 @@
         .lyrics {
             line-height: 1.9;
             white-space: pre-line;
-            text-align: left;
+            text-align: center;
             font-size: 0.95em;
-            max-width: 600px;
+            max-width: 700px;
         }
         
         .lyrics p {
@@ -189,31 +322,44 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: rgba(0, 0, 0, 0.78);
+            background: rgba(14, 16, 30, 0.9);
             padding: 12px 16px;
-            border-radius: 16px;
+            border-radius: 12px;
             backdrop-filter: blur(12px);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+            box-shadow:
+                0 0 0 2px #11162a,
+                0 0 0 4px rgba(60, 80, 160, 0.25),
+                0 14px 24px -12px rgba(0, 0, 0, 0.65);
             z-index: 1000;
-            border: 1px solid rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.08);
         }
         
         .nav-buttons button {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 25px;
+            background: linear-gradient(145deg, #7689ff 0%, #9a65ff 100%);
+            color: #0b0d15;
+            border: 2px solid #c7d0ff;
+            padding: 11px 22px;
+            border-radius: 10px;
             cursor: pointer;
-            font-size: 0.9em;
-            font-weight: 600;
-            transition: all 0.3s;
-            min-width: 110px;
+            font-size: 0.95em;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            font-family: 'PixelMplus12', 'Press Start 2P', 'PixelMplus10', 'MS PGothic', 'Courier New', monospace;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+            min-width: 118px;
+            box-shadow:
+                0 0 0 2px #10142a,
+                0 6px 14px rgba(0, 0, 0, 0.45),
+                inset 0 -3px 0 rgba(0, 0, 0, 0.25);
         }
         
         .nav-buttons button:hover:not(:disabled) {
-            transform: scale(1.05);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+            transform: translateY(-2px);
+            box-shadow:
+                0 0 0 2px #10142a,
+                0 12px 18px rgba(0, 0, 0, 0.5),
+                inset 0 -3px 0 rgba(0, 0, 0, 0.25);
+            filter: brightness(1.05);
         }
         
         .nav-buttons button:disabled {
@@ -236,9 +382,10 @@
             width: min(640px, 92vw);
             height: 6px;
             background: rgba(255, 255, 255, 0.08);
-            border-radius: 999px;
+            border-radius: 3px;
             overflow: hidden;
             z-index: 900;
+            box-shadow: 0 0 0 2px #12182d, inset 0 1px 0 rgba(255, 255, 255, 0.08);
         }
 
         .progress__bar {
@@ -246,6 +393,7 @@
             width: 0%;
             background: linear-gradient(90deg, #667eea, #8b5cf6);
             transition: width 0.25s ease;
+            box-shadow: 0 0 12px rgba(139, 92, 246, 0.35);
         }
         
         .sound-detail {
@@ -254,6 +402,7 @@
             padding: 1em;
             margin: 0.8em 0;
             border-radius: 4px;
+            box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.05);
         }
         
         .sound-detail strong {
@@ -284,6 +433,7 @@
             font-size: 0.9em;
             color: #94a3b8;
         }
+
         
         @media (min-width: 768px) {
             .slide {
@@ -332,9 +482,14 @@
                 min-width: 50px;
             }
 
-            .glitch-title {
-                font-size: 2em;
-                text-shadow: 1px 1px #ff00ff, -1px -1px #00ffff;
+            .title-animate {
+                font-size: 2.2em;
+                letter-spacing: 0.14em;
+            }
+
+            .hero-slide {
+                padding-top: 100px;
+                padding-bottom: 180px;
             }
 
             .content-box,
@@ -345,34 +500,52 @@
         }
     </style>
 </head>
-<body>
+<body class="locked">
+    <div class="gate" id="gate">
+        <div class="gate-box">
+            <div class="gate-title">ACCESS</div>
+            <div class="gate-desc">パスワードを入力してください。</div>
+            <input type="password" id="gateInput" placeholder="Password">
+            <button id="gateBtn">ENTER</button>
+            <div class="gate-error" id="gateError"></div>
+        </div>
+    </div>
     <div class="slide-container">
         <!-- Slide 1: 表紙 -->
-        <div class="slide">
-            <h1 class="glitch-title">しゅるれりら</h1>
-            <p class="subtitle">編曲プロデュース依頼資料</p>
+        <div class="slide hero-slide">
+            <h1 class="title-animate" data-title="しゅるれりら">しゅるれりら</h1>
+            <p class="subtitle">ヒトリエ様</p class="subtitle">編曲プロデュース依頼資料</p>
             <div style="margin-top: 60px; font-size: 1.1em; line-height: 1.8;">
                 <p><strong>作詞・作曲</strong>：音羽-otoha-</p>
-                <p><strong>編曲依頼先</strong>：ヒトリエ（またはシノダ）</p>
                 <p><strong>用途</strong>：アニメ「サンダー3」ED</p>
-                <p><strong>尺</strong>：1分30秒（TV尺/スポット用）</p>
             </div>
         </div>
 
         <!-- Slide 2: タイアップ情報 -->
         <div class="slide">
             <h2>タイアップ情報</h2>
+            <figure class="tieup-figure">
+                <img src="../shururerira-deck/71z0nQxOY3L._AC_UF1000,1000_QL80_.jpg" alt="サンダー3 公式ビジュアル">
+                <figcaption>「サンダー3」公式ビジュアル</figcaption>
+            </figure>
+            <div class="content-box">
+                <h3>作品の概要</h3>
+                <p style="line-height: 1.7;">
+                    月刊少年マガジン連載（池田祐輝）。中学生のぴょんたろうと友人2人（スモール3）が、担任ドクから借りた謎のゲームディスクを再生した隙に、妹ふたばがテレビの中の異世界へ吸い込まれる。<br>
+                    3人はふたばを取り戻すためにマルチバースを冒険する――という奇想天外なSFアドベンチャー。コミカルな日常感と、異世界をまたぐスケール感が同居する。
+                </p>
+            </div>
             <div class="content-box">
                 <h3>アニメ「サンダー3」ED</h3>
-                <p class="large-text">主人公の妹「ふたば」と「ぷーすけ」が<br>夜中にテレビを見ている映像</p>
+                <p class="line-height: 1.7;">主人公の妹「ふたば」と「ぷーすけ」が<br>夜中にテレビを見ている映像</p>
                 <p style="margin-top: 1.5em; font-size: 0.95em; opacity: 0.8;">※そのテレビには「もう一つの世界」が映っている</p>
             </div>
             <figure class="tieup-figure">
-                <img src="./tieup.jpg" alt="音羽なりの勝手なイメージイラスト：ふたばとぷーすけがテレビを見ているスケッチ">
+                <img src="../shururerira-deck/tieup.jpg" alt="音羽なりの勝手なイメージイラスト：ふたばとぷーすけがテレビを見ているスケッチ">
                 <figcaption>音羽なりの勝手なイメージイラスト</figcaption>
             </figure>
             <div class="content-box" style="margin-top: 1.5em;">
-                <p style="line-height: 1.7;">この作品世界観と、ヒトリエの皆さん特有の<strong>ネットカルチャー感</strong>との間に高い親和性を感じました。</p>
+                <p style="line-height: 1.7;">この作品の世界観と、ヒトリエの皆さん特有の<strong>ネットカルチャー感</strong>に高い親和性を感じました。</p>
             </div>
         </div>
 
@@ -382,18 +555,45 @@
             <h3>「しゅるれりら」とは</h3>
             
             <div class="content-box">
-                <p class="large-text">考える前に、創造が起きてしまっている状態</p>
+                <p class="large-text">考える前に自由に創造を起こすこと、またはその状態を表す造語</p>
             </div>
 
             <div class="content-box">
-                <p>子供が「シュルレアリスム」という言葉を<br>
-                意味も分からず、聞き間違えて、舌ったらずに発音しているイメージ</p>
+                <p>子供が「シュルレアリスム」という言葉を、意味も分からないまま聞き間違えて、舌ったらずに発音しているイメージから生まれました。</p>
             </div>
 
-            <div class="content-box warning">
-                <p><strong>重要：</strong></p>
-                <p>意味はない / 定義できない / でも音として口に出したくなる</p>
-                <p style="margin-top: 1em;">→ 考える前に、創造が起きてしまっている状態そのもの</p>
+            <div class="content-box">
+                <h3>「シュルレアリスム」概要</h3>
+                <p style="line-height: 1.7;">
+                    1920年代にアンドレ・ブルトンらが提唱した前衛芸術運動。<br>
+                    「意識や理性で整理する前に、無意識下から自動的に立ち上がるイメージや言葉を信じて表現する」ことを重視し、日常の現実と夢や潜在意識が交錯する<h4>高次元の「もう一つの現実」を描こうとする。</h4>
+                </p>
+                <p style="line-height: 1.7; margin-top: 0.8em;">
+                    本作の「しゅるれりら」は、その自動的な創造の瞬間を、子供の口ぶりと音の快感で体現した語感。
+                </p>
+            </div>
+
+        </div>
+
+        <!-- Slide 4: ターゲット感覚 -->
+        <div class="slide">
+            <h2>ターゲット感覚（二重構造）</h2>
+            <div class="dual-target">
+                <div class="target-box">
+                    <h3>疲弊した現代人</h3>
+                    <p>もう思考する体力がない<br>
+                    正しさや判断を求められることに疲弊している<br>
+                    AIや時代の加速に適応しきれず、気力を失っている</p>
+                </div>
+                <div class="target-box">
+                    <h3>これからの時代を生きる子供たち</h3>
+                    <p>まだ意味や正解を理解しなくていい存在<br>
+                    音・リズム・動きで世界を素直に受け取る年齢<br>
+                    これからさらに文明が加速する社会に入っていく</p>
+                </div>
+            </div>
+            <div class="content-box" style="margin-top: 1.5em;">
+                <p style="text-align: center; font-size: 1.1em;"><strong>同じ音楽が、別のレイヤーで受け取られる状態</strong>を目指しています。</p>
             </div>
         </div>
 
@@ -405,7 +605,8 @@
                 違う誰かに変わってないかな<br>
                 誰もが認める天才とか<br>
                 完全無欠のヒーローとか<br>
-                ちっぽけな夜の中 夢を見る<br>
+
+                <p>ちっぽけな夜の中 夢を見る<br>
                 涙の海に潜り込んだら<br>
                 まっさらな宇宙を泳ぎに行こう<br>
                 案外世界も救えるさ</p>
@@ -425,29 +626,32 @@
             </div>
         </div>
 
+        <!-- Slide 5: 作詞・作曲メモ -->
+        <div class="slide">
+            <h2>作詞・作曲の意識</h2>
+            <div class="content-box">
+                <p>サンダー3のレトロな絵柄、不可能を可能にするストレートな物語から、ドラえもんのような夕方アニメを連想しました。昔口ずさんでいた子ども向けアニメの曲を思い出しながら、シンプルなメロディと子どもにも届く言葉を意識しています。</p>
+                <p style="margin-top: 1em;">一方で、そのままでは素直すぎるかもしれないという不安もあります。だからこそ、ヒトリエの持つネット的なズレやアイロニーを重ねることで、優しい入口と奇妙な引っかかりが同居する状態にしたいと考えています。</p>
+            </div>
+        </div>
+
         <!-- Slide 5: サウンド方向性（詳細版） -->
         <div class="slide">
             <h2>サウンド方向性</h2>
             
             <div class="sound-detail">
                 <strong>■ 基本コンセプト</strong>
-                <p>バンドサウンドではなく、<strong>電子音・シンセサイザー中心</strong>の構成</p>
+                <p>現状のデモ程度のバンドサウンドに加え、<strong>電子音・シンセサイザーも主張強め</strong>の構成</p>
             </div>
 
-            <div class="sound-detail">
-                <strong>■ 音色・音響イメージ</strong>
-                <p>• 8bit/16bit的なレトロゲームサウンド<br>
-                • ピコピコ・ピロリロといった明るい電子音<br>
-                • チップチューン的な質感（ただし古臭くならないように）<br>
-                • グリッチ・ノイズを効果的に配置</p>
-            </div>
-
-            <div class="sound-detail">
-                <strong>■ 効果音の活用</strong>
-                <p>• 昔の漫画/アニメ的なSE（ビョイーン、ドカーン等）<br>
-                • ゲームのカーソル音・決定音<br>
-                • テレビのノイズ・砂嵐<br>
-                • リモコンの"ピッ"音（冒頭必須）</p>
+            <div class="content-box">
+                <h3>ヒトリエ×サンダー3の化学反応</h3>
+                <p><strong>• デジタルとアナログの境界を自在に行き来できる</strong><br>
+                インターネット発の音楽文化で培われた高密度の楽曲を、ライブバンドならではのグルーヴに翻訳してきたのがヒトリエだと思っています。現実と画面の向こう側を行き来する「サンダー3」の世界観に合わせ、デジタル的な異世界感やノイズを人間味ある演奏と併せて落とし込んでいただけたらと考えています。</p>
+                <p><strong>• ポップと違和感の絶妙な両立</strong><br>
+                耳に残るキャッチーさの裏に、転調や突発的な曲調変化で「ん？」と思わせるフック。「サンダー3」もレトロなキャラクターとリアルな3D世界というギャップを持つ作品なので、楽曲も優しい入口と奇妙な違和感を同居させたいと思っています。</p>
+                <p><strong>• ネット文化特有の遊び心とアイロニー</strong><br>
+                メタ構造や内輪ネタが自然に溶け込むネット感覚を音に落とし込みたい。子ども向け番組のような明るさと、不穏でシュールなフックを融合させ、クセになる感覚を狙いたいと考えています。</p>
             </div>
         </div>
 
@@ -455,65 +659,14 @@
         <div class="slide">
             <h2>サウンド方向性（続き）</h2>
             
-            <div class="sound-detail">
-                <strong>■ 構成・展開</strong>
-                <p>• イントロ：ノイズ → リモコン音 → 静寂から立ち上がる<br>
-                • Aメロ：比較的シンプル、ボーカルを聴かせる<br>
-                • サビ：一気に賑やかに、音数を増やす<br>
-                • アウトロ：余韻を残しつつフェードアウト</p>
-            </div>
-
-            <div class="sound-detail">
-                <strong>■ 目指す質感</strong>
-                <p>• 明るく賑やかだが、どこか不穏<br>
-                • ポップだが、完全には整理されていない<br>
-                • 子供向けアニメ的な軽快さと、大人が感じる違和感の共存<br>
-                • ネット/ゲーム世代に刺さるノスタルジー</p>
-            </div>
-
-            <div class="content-box warning">
-                <p><strong>重要：</strong>大衆性は保ちつつ、構造のどこかに<strong>"ズレ"や"異物"</strong>を残してください。<br>
-                ただし、それを説明する必要はありません。</p>
-            </div>
-        </div>
-
-        <!-- Slide 7: 必ず残したい要素 -->
-        <div class="slide">
-            <h2>必ず残したい要素</h2>
-            <div class="content-box warning">
-                <h3>冒頭の音（必須）</h3>
-                <p><strong>• ノイズ音<br>
-                • リモコンの"ピッ"という音</strong></p>
-                <p style="margin-top: 1em;">これらは楽曲のコンセプト上、必須の要素です。<br>
-                「テレビをつける=もう一つの世界へ入る」という導入を音で示します。</p>
-            </div>
             <div class="content-box">
-                <h3>構造に残す"異物"</h3>
-                <p>大衆向けの入口は最大限に広く保ちながら、<br>
-                構造のどこかに<strong>違和感・ズレ・不穏さ</strong>を仕込んでください。</p>
-                <p style="margin-top: 0.8em; font-size: 0.9em; opacity: 0.8;">※ただし、それを説明する必要はありません。</p>
-            </div>
-        </div>
-
-        <!-- Slide 8: ターゲット感覚 -->
-        <div class="slide">
-            <h2>ターゲット感覚（二重構造）</h2>
-            <div class="dual-target">
-                <div class="target-box">
-                    <h3>疲れた大人</h3>
-                    <p>もう思考する体力がない<br>
-                    正しさや判断を求められることに疲弊している<br>
-                    AIや時代の加速に適応しようとして、気力を失っている</p>
-                </div>
-                <div class="target-box">
-                    <h3>今の子供たち</h3>
-                    <p>まだ意味や正解を理解しなくていい存在<br>
-                    音・リズム・動きで世界を受け取る年齢<br>
-                    これからさらに加速する社会に入っていく</p>
-                </div>
-            </div>
-            <div class="content-box" style="margin-top: 1.5em;">
-                <p style="text-align: center; font-size: 1.1em;"><strong>同じ音楽が、別のレイヤーで受け取られる状態</strong>を目指しています。</p>
+                <h3>具体的なサウンドの提案（例）</h3>
+                <p><strong>• 唐突な変化</strong><br>
+                セクションごとに唐突な空気の変化を感じさせる仕掛け。「サンダー3」1話の急展開にもリンク。</p>
+                <p><strong>• ノイズや効果音</strong><br>
+                テレビのザッピング音、ゲーム機の効果音、子どもの声など、ネットやテレビ文化を想起させる素材をアクセントに。</p>
+                <p><strong>• 最終的には大衆性を確保しつつ、必ず刺さる歪みを残す</strong><br>
+                聴きやすさを損なわない範囲で、不穏なフックを忍ばせ、無意識に違和感を覚えるポイントを作る。</p>
             </div>
         </div>
 
@@ -521,19 +674,17 @@
         <div class="slide">
             <h2>依頼事項まとめ</h2>
             <div class="content-box">
-                <h3>お任せしたいこと</h3>
-                <p>• 電子音・効果音の選定と配置<br>
-                • サビの賑やかさと不穏さのバランス<br>
-                • ネットカルチャー的な"ズレ"の演出<br>
-                • 全体的な音響デザインとミックス<br>
+                <h3>依頼事項</h3>
+                <p>• バンドサウンドおよび電子音・効果音の選定と配置<br>
+                • サビの賑やかさ/明るさと、全体のどこかに忍ばせる不穏さのバランス調整<br>
+                • (可能であれば)レコーディング<br>
                 • レトロゲーム的質感の現代的アップデート</p>
             </div>
             <div class="content-box warning">
-                <h3>守ってほしいこと</h3>
-                <p>• 冒頭のノイズ + リモコン音は必須<br>
-                • 1分30秒（TV尺/スポット用）<br>
-                • 説教・啓蒙的にならないこと<br>
-                • 大衆性は保ちつつ、どこかに"刺さる刃"を残す</p>
+                <h3>重要事項</h3>
+                <p>• 冒頭のノイズ+リモコンの「ピッ」という音は、ED映像のイメージと楽曲のコンセプト上残していただきたいです。(「テレビをつける=もう一つの世界へ入る」という導入を音で示しています。)<br>
+                • TVスポット用尺確認のため、一旦は1分30秒になります。その後は3分〜4分程度のフルサイズ作成もお願いできればと思います。<br>
+                • 大衆性は保ちつつ、インターネットや漫画カルチャーが好きな方達にも刺さりそうなヒトリエならではの持ち味を、私は渇望しています。</p>
             </div>
         </div>
 
@@ -543,18 +694,17 @@
             <div class="content-box" style="text-align: center; padding: 2em;">
                 <p style="font-size: 1.2em; line-height: 1.8; margin-bottom: 1.5em;">
                     この曲が伝えたいのは、<br>
-                    <strong>「考えなくていい、理解できなくていい、正しくなくていい」</strong><br>
-                    <strong>「でも、創造することだけはやめないでほしい」</strong>
+                    <strong>「分かろうとしなくていい、正しくあろうとしなくていい</strong><br>
+                    <strong>でも、想像/創造することだけはやめないでほしい」</strong>
                 </p>
                 <p style="font-size: 1em; opacity: 0.9; margin-bottom: 2em;">
-                    これは主張ではなく、<strong>状態</strong>です。<br>
-                    思考を通らずに起きる、外に出す行為としての創造。
+                    ある意味私たちクリエイターも当事者になる楽曲だと思っています。<br>
                 </p>
                 <p style="font-size: 1.1em; margin-top: 2em;">
-                    何卒よろしくお願いいたします。
+                    お忙しい中、急なお願いとなってしまって大変恐縮ですが、何卒よろしくお願いいたします。
                 </p>
                 <p style="margin-top: 2em; font-size: 0.9em; opacity: 0.7;">
-                    作詞作曲：音羽-otoha-
+                    音羽-otoha-
                 </p>
             </div>
         </div>
@@ -575,12 +725,19 @@
         const totalSlides = slides.length;
         const progressBar = document.getElementById('progressBar');
         const slideContainer = document.querySelector('.slide-container');
+        const titleEl = document.querySelector('.title-animate');
+        const gate = document.getElementById('gate');
+        const gateInput = document.getElementById('gateInput');
+        const gateBtn = document.getElementById('gateBtn');
+        const gateError = document.getElementById('gateError');
+        const ACCESS_PASSWORD = "0112otorie"; // 必要に応じて変更してください
 
         function resetScroll() {
             if (slideContainer) slideContainer.scrollTop = 0;
             document.documentElement.scrollTop = 0;
             document.body.scrollTop = 0;
             if (slides[currentSlide]) slides[currentSlide].scrollTop = 0;
+            // Safari/iOS で遅延が必要な場合に備えて
             requestAnimationFrame(() => {
                 if (slideContainer) slideContainer.scrollTop = 0;
                 if (slides[currentSlide]) slides[currentSlide].scrollTop = 0;
@@ -617,12 +774,57 @@
             showSlide(currentSlide);
         }
 
+        function animateTitle() {
+            if (!titleEl) return;
+            const text = (titleEl.dataset.title || titleEl.textContent || '').trim();
+            if (!text) return;
+            titleEl.textContent = '';
+            Array.from(text).forEach((char, idx) => {
+                const span = document.createElement('span');
+                span.className = 'title-char';
+                span.textContent = char === ' ' ? '\u00A0' : char;
+                const offset = (Math.random() * 14 - 7).toFixed(1) + 'px';
+                const drift = (Math.random() * 6 - 3).toFixed(1) + 'px';
+                span.style.setProperty('--offset', offset);
+                span.style.setProperty('--drift', drift);
+                span.style.setProperty('--delay', `${idx * 0.24}s`);
+                titleEl.appendChild(span);
+            });
+        }
+
         document.addEventListener('keydown', (e) => {
             if (e.key === 'ArrowLeft') changeSlide(-1);
             if (e.key === 'ArrowRight') changeSlide(1);
         });
 
-        showSlide(0);
+        function unlock() {
+            document.body.classList.remove('locked');
+            if (gate) gate.style.display = 'none';
+            showSlide(0);
+            animateTitle();
+        }
+
+        function handleAuth() {
+            if (!gateInput) return;
+            const val = gateInput.value.trim();
+            if (val === ACCESS_PASSWORD) {
+                sessionStorage.setItem('shurureriraAccess', 'ok');
+                unlock();
+            } else {
+                gateError.textContent = "パスワードが違います。";
+            }
+        }
+
+        if (sessionStorage.getItem('shurureriraAccess') === 'ok') {
+            unlock();
+        } else {
+            document.body.classList.add('locked');
+            if (gateBtn) gateBtn.addEventListener('click', handleAuth);
+            if (gateInput) gateInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') handleAuth();
+            });
+        }
+
     </script>
 </body>
 </html>
